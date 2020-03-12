@@ -1,2 +1,2 @@
-# sworm_on_vm
+# swarm_on_vm
 Testing installation on Swarm on public Cloud (AWS)
