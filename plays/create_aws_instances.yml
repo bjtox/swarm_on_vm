@@ -1,40 +1,44 @@
 # AWS playbook
 ---
-- hosts: localhost
+- hosts: all
   connection: local
-  gather_facts: False
+  gather_facts: true
+  vars_files:
+    - ../groups_vars/all.yml
+    - ../groups_vars/aws.yml
+    - ../groups_vars/vault.yml
 
 
   tasks:
-    - name: Generate Temporary key
-      openssh_keypair:
-        path: /tmp/id_ssh_rsa
-        size: 2048
-        mode: 400
-      register: tmp_key
+    # - name: Generate Temporary key
+    - name: Generate SSH keys
+      shell: ssh-keygen -b 2048 -t rsa -f {{ ssh_key_path }} -q -N ""
+      args:
+        creates: "{{ ssh_key_path }}"
 
     - name: Provisioning EC2 instances
       block:
       - name: Upload public key to AWS
         ec2_key:
           name: "{{ key_name }}"
-          key_material: "{{ tmp_key.public_key }}"
+          key_material: "{{ lookup('file', '{{ ssh_key_path }}.pub') }}"
           region: "{{ region }}"
           aws_access_key: "{{ec2_access_key}}"
           aws_secret_key: "{{ec2_secret_key}}"
-          
+
       - name: Create security group
         ec2_group:
           name: "{{ sec_group }}"
-          description: "Sec group for app {{ id }}"
+          description: "Sec group for app swarm_vm"
           region: "{{ region }}"
           aws_access_key: "{{ec2_access_key}}"
           aws_secret_key: "{{ec2_secret_key}}"
+          vpc_id: "{{ vpc_id }}"
           rules:
             - proto: tcp
               ports:
                 - 22
-              cidr_ip: ***
+              cidr_ip: "{{ inbound_cidr_ip }}"
               rule_desc: allow all on ssh port
         register: result_sec_group
 
@@ -43,12 +47,12 @@
           aws_access_key: "{{ec2_access_key}}"
           aws_secret_key: "{{ec2_secret_key}}"
           key_name: "{{ key_name }}"
-          id: "{{ id }}"
           group_id: "{{ result_sec_group.group_id }}"
           image: "{{ image }}"
           instance_type: t2.micro
           region: "{{ region }}"
-          wait: true
+          vpc_subnet_id: "{{ vpc_subnet_id }}"
+          wait: yes
           count: 2
         register: ec2
 
