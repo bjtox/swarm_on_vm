@@ -1,0 +1,6 @@
+---
+- name: Include a play after another play
+  import_playbook: create_aws_instances.yml
+
+- name: Include a play after another play
+  import_playbook: provision_docker_swarm_claster.yml

@@ -26,10 +26,34 @@
           aws_access_key: "{{ec2_access_key}}"
           aws_secret_key: "{{ec2_secret_key}}"
 
-      - name: Create security group
+      - name: Create security group for master
         ec2_group:
-          name: "{{ sec_group }}"
-          description: "Sec group for app swarm_vm"
+          name: "{{ sec_group_master }}"
+          description: "Sec group for app swarm_vm master"
+          region: "{{ region }}"
+          aws_access_key: "{{ec2_access_key}}"
+          aws_secret_key: "{{ec2_secret_key}}"
+          vpc_id: "{{ vpc_id }}"
+        
+        register: result_sec_group_master
+
+      - name: Create security group for workers
+        ec2_group:
+          name: "{{ sec_group_workers }}"
+          description: "Sec group for app swarm_vm workers"
+          region: "{{ region }}"
+          aws_access_key: "{{ec2_access_key}}"
+          aws_secret_key: "{{ec2_secret_key}}"
+          vpc_id: "{{ vpc_id }}"
+          rules:
+            - proto: all
+              group_name: "{{ result_sec_group_master.group_name }}"
+        register: result_sec_group_workers
+
+      - name: Update security group for master
+        ec2_group:
+          name: "{{ sec_group_master }}"
+          description: "Sec group for app swarm_vm master"
           region: "{{ region }}"
           aws_access_key: "{{ec2_access_key}}"
           aws_secret_key: "{{ec2_secret_key}}"
@@ -40,24 +64,54 @@
                 - 22
               cidr_ip: "{{ inbound_cidr_ip }}"
               rule_desc: allow all on ssh port
-        register: result_sec_group
+            - proto: all
+              group_name: "{{ result_sec_group_workers.group_name }}"
+        register: result_sec_group_master
 
-      - name: Provision instances
+      - name: Provision swarm Master
         ec2:
           aws_access_key: "{{ec2_access_key}}"
           aws_secret_key: "{{ec2_secret_key}}"
           key_name: "{{ key_name }}"
-          group_id: "{{ result_sec_group.group_id }}"
+          group_id: "{{ result_sec_group_master.group_id }}"
           image: "{{ image }}"
           instance_type: t2.micro
           region: "{{ region }}"
           vpc_subnet_id: "{{ vpc_subnet_id }}"
           wait: yes
-          count: 2
-        register: ec2
+          count: 1
+          assign_public_ip: yes
+          instance_tags:
+            Name: swarm_master
+        register: swarm_master
 
-      - name: Add created instances in hosts
+      - name: Provision swarm Workers
+        ec2:
+          aws_access_key: "{{ec2_access_key}}"
+          aws_secret_key: "{{ec2_secret_key}}"
+          key_name: "{{ key_name }}"
+          group_id:
+            - "{{ result_sec_group_workers.group_id }}"
+            - "{{ result_sec_group_master.group_id }}"
+          image: "{{ image }}"
+          instance_type: t2.micro
+          region: "{{ region }}"
+          vpc_subnet_id: "{{ vpc_subnet_id_worker }}"
+          wait: yes
+          count: "{{ workers_count }}"
+          assign_public_ip: yes
+          instance_tags:
+            Name: swarm_worker
+        register: swarm_worker
+
+      - name: Add created master in hosts
+        add_host:
+          name: "{{ item.public_ip }} swarm_labels=deploy"
+          groups: docker_swarm_manager
+        with_items: "{{ swarm_master.instances }}"
+
+      - name: Add created workers in hosts
         add_host:
           name: "{{ item.public_ip }}"
-          groups: webservers
-        with_items: "{{ ec2.instances }}"
+          groups: docker_swarm_worker
+        with_items: "{{ swarm_worker.instances }}"

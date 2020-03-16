@@ -1,0 +1,33 @@
+---
+- name: "waiting ec2 connection"
+  hosts: docker_swarm_worker
+  become: yes
+  remote_user: centos
+  gather_facts: false
+  tasks:
+    - name: Wait for system to become reachable
+      wait_for_connection:
+        timeout: 900
+
+
+
+
+  vars_files:
+    - ../groups_vars/all.yml
+    - ../groups_vars/aws.yml
+    - ../groups_vars/vault.yml
+  vars:
+    ansible_ssh_private_key_file: "{{ ssh_key_path }}"
+
+- name: "Configure Swarm Master"
+  hosts: docker_swarm_manager:docker_swarm_worker
+  become: yes
+  remote_user: centos
+  roles:
+    - { role: atosatto.docker-swarm }
+  vars_files:
+    - ../groups_vars/all.yml
+    - ../groups_vars/aws.yml
+    - ../groups_vars/vault.yml
+  vars:
+    ansible_ssh_private_key_file: "{{ ssh_key_path }}"

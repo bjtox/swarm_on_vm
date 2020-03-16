@@ -1,1 +1,3 @@
 ---
+ssh_key_path: /tmp/id_rsa
+workers_count: 1

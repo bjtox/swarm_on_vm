@@ -1,9 +1,11 @@
 ---
 region: eu-west-1
 key_name: temporary_key_ec2
-sec_group: allow_ssh_inbound
+sec_group_master: swarm-master-sg
+sec_group_workers: swarm-worker-sg
 inbound_cidr_ip: 151.42.216.178/32
 # image: ami-0ff760d16d9497662
 image: ami-0019f18ee3d4157d3
-vpc_id: vpc-931ae4f7
-vpc_subnet_id: subnet-700fab14
+vpc_id: vpc-84d173e0
+vpc_subnet_id: subnet-a8a619de
+vpc_subnet_id_worker: subnet-a8a619de
