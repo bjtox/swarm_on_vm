@@ -1,0 +1,29 @@
+---
+- name: "waiting ec2 connection"
+  hosts: docker_swarm_manager:docker_swarm_worker
+  become: yes
+  remote_user: centos
+  gather_facts: false
+  tasks:
+    - name: Wait for system to become reachable
+      wait_for_connection:
+        timeout: 900
+
+- name: "Configure Swarm Claster"
+  hosts: docker_swarm_manager:docker_swarm_worker
+  become: yes
+  remote_user: centos
+  tasks:
+    - ec2_metadata_facts:
+    - name: Configure Certs
+      include_role:
+        name: jdauphant.ssl-certs
+      vars:
+        ssl_certs_common_name: "{{ ansible_ec2_public_hostname }}"
+        ssl_certs_path_owner: "centos"
+        ssl_certs_path_group: "centos"
+    - name: Configure Cluster
+      include_role:
+        name: atosatto.docker-swarm
+  roles:
+    # - { role: atosatto.docker-swarm }

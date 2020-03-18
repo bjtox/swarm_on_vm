@@ -1,0 +1,33 @@
+---
+
+  # ssh_key_path: /tmp/id_rsa
+ssh_key_path: /tmp/id_rsa
+ansible_ssh_private_key_file: "{{ ssh_key_path }}"
+workers_count: 1
+ec2_access_key: "{{ encrypted_ec2_access_key }}"
+ec2_secret_key: "{{ encrypted_ec2_secret_key }}"
+region: eu-west-1
+key_name: temporary_key_ec2
+sec_group_master: swarm-master-sg
+sec_group_workers: swarm-worker-sg
+inbound_cidr_ip: "{{ encrypted_inbound_cidr_ip }}"
+# image: ami-0ff760d16d9497662
+image: ami-0019f18ee3d4157d3
+vpc_id: vpc-84d173e0
+vpc_subnet_id: subnet-a8a619de
+vpc_subnet_id_worker: subnet-a8a619de
+
+
+
+docker_service_override: |
+  [Service]
+  ExecStart=
+  ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375
+
+docker_service_state: "started"
+docker_service_enabled: "yes"
+docker_daemon_config:
+  tls: true
+  tlscert: "/etc/ssl/{{ ansible_ec2_public_hostname }}/{{ ansible_ec2_public_hostname }}.pem"
+  tlskey: "/etc/ssl/{{ ansible_ec2_public_hostname }}/{{ ansible_ec2_public_hostname }}.key"
+# }
