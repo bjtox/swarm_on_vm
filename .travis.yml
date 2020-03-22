@@ -12,6 +12,7 @@ env:
 
 
 
+
 before_install:
   - sudo apt-get update -qq
 
@@ -19,3 +20,7 @@ install:
   # Install Ansible.
   - if [ "$ANSIBLE_VERSION" = "latest" ]; then pip install ansible; else pip install ansible==$ANSIBLE_VERSION; fi
   - if [ "$ANSIBLE_VERSION" = "latest" ]; then pip install ansible-lint; fi
+
+script:
+  # Check the role/playbook's syntax.
+  - ansible-playbook -i inventory plays/main.yml --syntax-check
