@@ -11,7 +11,7 @@
   tasks:
     # - name: Generate Temporary key
     - name: Generate SSH keys
-      shell: ssh-keygen -b 2048 -t rsa -f {{ ssh_key_path }} -q -N ""
+      command: ssh-keygen -b 2048 -t rsa -f {{ ssh_key_path }} -q -N ""
       args:
         creates: "{{ ssh_key_path }}"
 

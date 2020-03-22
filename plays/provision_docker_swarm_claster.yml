@@ -14,7 +14,8 @@
   become: yes
   remote_user: centos
   tasks:
-    - ec2_metadata_facts:
+    - name: store ec2 meta
+      ec2_metadata_facts:
     - name: Configure Certs
       include_role:
         name: jdauphant.ssl-certs
