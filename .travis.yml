@@ -9,7 +9,6 @@ python: "2.7"
 env:
   - ANSIBLE_VERSION=latest
   - ANSIBLE_VERSION=2.9
-  - ANSIBLE_VERSION=2.7
 
 before_install:
   - sudo apt-get update -qq
