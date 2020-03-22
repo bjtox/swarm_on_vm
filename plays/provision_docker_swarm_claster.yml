@@ -14,7 +14,8 @@
   become: yes
   remote_user: centos
   tasks:
-    - ec2_metadata_facts:
+    - name: store ec2 meta
+      ec2_metadata_facts:
     - name: Configure Certs
       include_role:
         name: jdauphant.ssl-certs
@@ -25,5 +26,3 @@
     - name: Configure Cluster
       include_role:
         name: atosatto.docker-swarm
-  roles:
-    # - { role: atosatto.docker-swarm }
