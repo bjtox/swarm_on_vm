@@ -7,7 +7,6 @@ python: "2.7"
 
 # Doc: https://docs.travis-ci.com/user/customizing-the-build#Build-Matrix
 env:
-  - ANSIBLE_VERSION=latest
   - ANSIBLE_VERSION=2.7
 
 
@@ -18,8 +17,8 @@ before_install:
 
 install:
   # Install Ansible.
-  - if [ "$ANSIBLE_VERSION" = "latest" ]; then pip install ansible; else pip install ansible==$ANSIBLE_VERSION; fi
-  - if [ "$ANSIBLE_VERSION" = "latest" ]; then pip install ansible-lint; fi
+  - pip install ansible==$ANSIBLE_VERSION
+  - pip install ansible-lint
 
 script:
   # Check the role/playbook's syntax.
