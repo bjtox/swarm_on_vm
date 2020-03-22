@@ -8,7 +8,7 @@ python: "2.7"
 # Doc: https://docs.travis-ci.com/user/customizing-the-build#Build-Matrix
 env:
   - ANSIBLE_VERSION=latest
-  - ANSIBLE_VERSION=2.9.6
+  - ANSIBLE_VERSION=2.7
 
 
 
@@ -24,3 +24,4 @@ install:
 script:
   # Check the role/playbook's syntax.
   - ansible-playbook -i inventory plays/main.yml --syntax-check
+  - ansible-lint plays/main.yml

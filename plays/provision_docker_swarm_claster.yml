@@ -25,5 +25,3 @@
     - name: Configure Cluster
       include_role:
         name: atosatto.docker-swarm
-  roles:
-    # - { role: atosatto.docker-swarm }
